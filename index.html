@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>রেন্ট ও প্রোপার্টি ম্যানেজমেন্ট</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- ফায়ারবেস স্ক্রিপ্টগুলো এখানে লোড করা হয়েছে যেন সবার আগে রেডি হয় -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
     <div class="container">
@@ -14,7 +18,7 @@
         <div class="card">
             <h2>👤 প্রোপার্টি ও মালিকের তথ্য সেটআপ</h2>
             <form id="property-form">
-                <input type="text" id="owner-name" placeholder="মালিকের নাম" required>
+                <input type="text" id="owner-name" placeholder="مালিকের নাম" required>
                 <input type="text" id="building-name" placeholder="বাড়ি/মার্কেটের নাম" required>
                 <input type="text" id="unit-name" placeholder="দোকান বা বাড়ির নাম/নম্বর" required>
                 <input type="number" id="fixed-rent" placeholder="নির্ধারিত মাসিক ভাড়া (টাকা)" required>
@@ -61,7 +65,7 @@
             <form id="expense-form">
                 <input type="text" id="expense-sector" placeholder="খরচের খাত/কারণ" required>
                 <input type="date" id="expense-date" required>
-                <input type="text" id="expense-by" placeholder="খরচকারীর নাম (ঐচ্ছিক)">
+                <input type="text" id="expense-by" placeholder="খরচকারী (ঐচ্ছিক)">
                 <input type="number" id="expense-amount" placeholder="টাকার পরিমাণ" required>
                 <button type="submit">খরচ যোগ করুন</button>
             </form>
@@ -97,12 +101,7 @@
         </div>
     </div>
 
-        <!-- Firebase Standard Scripts -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-    
     <!-- আপনার মেইন স্ক্রিপ্ট ফাইল -->
     <script src="app.js"></script>
 </body>
 </html>
-
