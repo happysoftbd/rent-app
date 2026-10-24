@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>রেন্ট ও প্রোপার্টি ম্যানেজমেন্ট</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 রেন্ট ও প্রোপার্টি ম্যানেজমেন্ট ড্যাশবোর্ড</h1>
+
+        <!-- প্রোফাইল ও প্রোপার্টি সেটআপ -->
+        <div class="card">
+            <h2>👤 প্রোপার্টি ও মালিকের তথ্য সেটআপ</h2>
+            <form id="property-form">
+                <input type="text" id="owner-name" placeholder="মালিকের নাম" required>
+                <input type="text" id="building-name" placeholder="বাড়ি/মার্কেটের নাম" required>
+                <input type="text" id="unit-name" placeholder="দোকান বা বাড়ির নাম/নম্বর" required>
+                <input type="number" id="fixed-rent" placeholder="নির্ধারিত মাসিক ভাড়া (টাকা)" required>
+                <button type="submit">প্রোপার্টি যুক্ত করুন</button>
+            </form>
+            <div id="property-list-container">
+                <h3>যুক্তকৃত প্রোপার্টি সমূহ:</h3>
+                <ul id="property-list"></ul>
+            </div>
+        </div>
+
+        <!-- ভাড়া আদায় ফর্ম -->
+        <div class="card">
+            <h2>💰 ভাড়া আদায় এন্ট্রি</h2>
+            <form id="rent-form">
+                <select id="rent-unit-select" required>
+                    <option value="">দোকান/বাড়ি নির্বাচন করুন</option>
+                </select>
+                <select id="rent-month" required>
+                    <option value="">মাসের নাম</option>
+                    <option value="জানুয়ারি">জানুয়ারি</option>
+                    <option value="ফেব্রুয়ারি">ফেব্রুয়ারি</option>
+                    <option value="মার্চ">মার্চ</option>
+                    <option value="এপ্রিল">এপ্রিল</option>
+                    <option value="মে">মে</option>
+                    <option value="জুন">জুন</option>
+                    <option value="জুলাই">জুলাই</option>
+                    <option value="আগস্ট">আগস্ট</option>
+                    <option value="সেপ্টেম্বর">সেপ্টেম্বর</option>
+                    <option value="অক্টোবর">অক্টোবর</option>
+                    <option value="নভেম্বর">নভেম্বর</option>
+                    <option value="ডিসেম্বর">ডিসেম্বর</option>
+                </select>
+                <input type="date" id="rent-date" required>
+                <input type="text" id="receipt-no" placeholder="রসিদ নং" required>
+                <input type="number" id="rent-amount" placeholder="আদায়কৃত টাকা" required>
+                <button type="submit">ভাড়া যোগ করুন</button>
+            </form>
+        </div>
+
+        <!-- খরচ এন্ট্রি ফর্ম -->
+        <div class="card">
+            <h2>📉 খরচের ভাউচার এন্ট্রি</h2>
+            <form id="expense-form">
+                <input type="text" id="expense-sector" placeholder="খরচের খাত/কারণ" required>
+                <input type="date" id="expense-date" required>
+                <input type="text" id="expense-by" placeholder="খরচকারীর নাম (ঐচ্ছিক)">
+                <input type="number" id="expense-amount" placeholder="টাকার পরিমাণ" required>
+                <button type="submit">খরচ যোগ করুন</button>
+            </form>
+        </div>
+
+        <!-- লাইভ সামারি ড্যাশবোর্ড -->
+        <div class="card summary-card">
+            <h2>📊 হিসাবের সারসংক্ষেপ (Summary)</h2>
+            <div class="summary-grid">
+                <div class="summary-box rent-box">
+                    <h3>মোট আদায়কৃত ভাড়া</h3>
+                    <p>৳ <span id="total-rent">0</span></p>
+                </div>
+                <div class="summary-box expense-box">
+                    <h3>মোট খরচ</h3>
+                    <p>৳ <span id="total-expense">0</span></p>
+                </div>
+                <div class="summary-box cash-box">
+                    <h3>বাকি নগদ তহবিল</h3>
+                    <p>৳ <span id="cash-in-hand">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- রিপোর্ট ও CSV ডাউনলোড -->
+        <div class="card">
+            <h2>📅 তারিখ অনুযায়ী CSV রিপোর্ট ডাউনলোড</h2>
+            <div class="filter-group">
+                <label>শুরুর তারিখ: <input type="date" id="start-date"></label>
+                <label>শেষ তারিখ: <input type="date" id="end-date"></label>
+                <button id="download-csv-btn">📊 CSV ফাইল ডাউনলোড করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Modular v9+) -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

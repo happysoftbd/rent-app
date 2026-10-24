@@ -1,0 +1,176 @@
+import { initializeApp } from "https://gstatic.com";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://gstatic.com";
+
+// 🔴 আপনার Firebase Project Settings থেকে নিচের কনফিগারেশনটি পরিবর্তন করুন
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Collections Refs
+const propertiesRef = collection(db, "properties");
+const rentRef = collection(db, "rent_collections");
+const expenseRef = collection(db, "expenses");
+
+// Local App State for Data Storage
+let allRents = [];
+let allExpenses = [];
+
+// --- 1. Property Setup ---
+document.getElementById("property-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const ownerName = document.getElementById("owner-name").value;
+    const buildingName = document.getElementById("building-name").value;
+    const unitName = document.getElementById("unit-name").value;
+    const fixedRent = Number(document.getElementById("fixed-rent").value);
+
+    try {
+        await addDoc(propertiesRef, { ownerName, buildingName, unitName, fixedRent, createdAt: new Date() });
+        document.getElementById("property-form").reset();
+    } catch (err) { console.error("Error adding property: ", err); }
+});
+
+// Real-time Properties View & Dropdown Update
+onSnapshot(query(propertiesRef, orderBy("createdAt", "desc")), (snapshot) => {
+    const list = document.getElementById("property-list");
+    const select = document.getElementById("rent-unit-select");
+    list.innerHTML = "";
+    select.innerHTML = '<option value="">দোকান/বাড়ি নির্বাচন করুন</option>';
+
+    snapshot.forEach((doc) => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `${data.buildingName} - ${data.unitName} (মালিক: ${data.ownerName}, ভাড়া: ৳${data.fixedRent})`;
+        list.appendChild(li);
+
+        const option = document.createElement("option");
+        option.value = JSON.stringify({ unit: data.unitName, building: data.buildingName });
+        option.textContent = `${data.buildingName} - ${data.unitName}`;
+        select.appendChild(option);
+    });
+});
+
+// --- 2. Rent Collection ---
+document.getElementById("rent-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pData = JSON.parse(document.getElementById("rent-unit-select").value);
+    const month = document.getElementById("rent-month").value;
+    const date = document.getElementById("rent-date").value;
+    const receiptNo = document.getElementById("receipt-no").value;
+    const amount = Number(document.getElementById("rent-amount").value);
+
+    try {
+        await addDoc(rentRef, { 
+            buildingName: pData.building, unitName: pData.unit, 
+            month, date, receiptNo, amount, timestamp: new Date(date) 
+        });
+        document.getElementById("rent-form").reset();
+    } catch (err) { console.error(err); }
+});
+
+// --- 3. Expense Management ---
+document.getElementById("expense-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const sector = document.getElementById("expense-sector").value;
+    const date = document.getElementById("expense-date").value;
+    const by = document.getElementById("expense-by").value || "উল্লেখ নেই";
+    const amount = Number(document.getElementById("expense-amount").value);
+
+    try {
+        await addDoc(expenseRef, { sector, date, by, amount, timestamp: new Date(date) });
+        document.getElementById("expense-form").reset();
+    } catch (err) { console.error(err); }
+});
+
+// --- 4. Live Dashboard Calculations ---
+function updateDashboard() {
+    const totalRent = allRents.reduce((sum, item) => sum + item.amount, 0);
+    const totalExpense = allExpenses.reduce((sum, item) => sum + item.amount, 0);
+    const cashInHand = totalRent - totalExpense;
+
+    document.getElementById("total-rent").textContent = totalRent;
+    document.getElementById("total-expense").textContent = totalExpense;
+    document.getElementById("cash-in-hand").textContent = cashInHand;
+}
+
+onSnapshot(rentRef, (snapshot) => {
+    allRents = [];
+    snapshot.forEach(doc => allRents.push(doc.data()));
+    updateDashboard();
+});
+
+onSnapshot(expenseRef, (snapshot) => {
+    allExpenses = [];
+    snapshot.forEach(doc => allExpenses.push(doc.data()));
+    updateDashboard();
+});
+
+// --- 5. CSV Report Generation (Date Range Filter) ---
+document.getElementById("download-csv-btn").addEventListener("click", () => {
+    const start = document.getElementById("start-date").value;
+    const end = document.getElementById("end-date").value;
+
+    if (!start || !end) {
+        alert("দয়া করে শুরুর তারিখ এবং শেষ তারিখ সিলেক্ট করুন।");
+        return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    endDate.setHours(23, 59, 59); // Include full end day
+
+    // Filter Data by Date
+    const filteredRents = allRents.filter(r => {
+        const d = new Date(r.date);
+        return d >= startDate && d <= endDate;
+    });
+
+    const filteredExpenses = allExpenses.filter(e => {
+        const d = new Date(e.date);
+        return d >= startDate && d <= endDate;
+    });
+
+    // Create CSV Content
+    let csvContent = "\ufeff"; // BOM for Bangla language support in Excel
+    csvContent += `রিপোর্ট সময়কাল:, ${start} থেকে ${end}\n\n`;
+
+    // Rent Section
+    csvContent += "--- আদায়কৃত ভাড়া ---\n";
+    csvContent += "তারিখ, বাড়ি/মার্কেট, দোকান/রুম, মাস, রসিদ নং, পরিমাণ (৳)\n";
+    filteredRents.forEach(r => {
+        csvContent += `${r.date}, ${r.buildingName}, ${r.unitName}, ${r.month}, ${r.receiptNo}, ${r.amount}\n`;
+    });
+
+    // Expense Section
+    csvContent += "\n--- খরচ বিবরণী ---\n";
+    csvContent += "তারিখ, খরচের খাত, খরচকারী, পরিমাণ (৳)\n";
+    filteredExpenses.forEach(e => {
+        csvContent += `${e.date}, ${e.sector}, ${e.by}, ${e.amount}\n`;
+    });
+
+    // Final Math Summary
+    const tRent = filteredRents.reduce((sum, item) => sum + item.amount, 0);
+    const tExpense = filteredExpenses.reduce((sum, item) => sum + item.amount, 0);
+    csvContent += `\n--- সর্বমোট সামারি ---\n`;
+    csvContent += `মোট আদায়কৃত ভাড়া:, ৳ ${tRent}\n`;
+    csvContent += `মোট খরচ:, ৳ ${tExpense}\n`;
+    csvContent += `অবশিষ্ট ক্যাশ ইন হ্যান্ড:, ৳ ${tRent - tExpense}\n`;
+
+    // Trigger Download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Rent_Report_${start}_to_${end}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
