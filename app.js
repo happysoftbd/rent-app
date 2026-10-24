@@ -1,14 +1,15 @@
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://gstatic.com";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://gstatic.com";
 
-// 🔴 আপনার Firebase Project Settings থেকে নিচের কনফিগারেশনটি পরিবর্তন করুন
+// Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyC7u56_bJ2IfQGxglyfo5DSqAj7TmnRppw",
+  authDomain: "rent-app-a88b8.firebaseapp.com",
+  projectId: "rent-app-a88b8",
+  storageBucket: "rent-app-a88b8.firebasestorage.app",
+  messagingSenderId: "770067014594",
+  appId: "1:770067014594:web:10bd76dea1633eca98ac5b"
 };
 
 // Initialize Firebase
@@ -61,7 +62,10 @@ onSnapshot(query(propertiesRef, orderBy("createdAt", "desc")), (snapshot) => {
 // --- 2. Rent Collection ---
 document.getElementById("rent-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const pData = JSON.parse(document.getElementById("rent-unit-select").value);
+    const selectValue = document.getElementById("rent-unit-select").value;
+    if(!selectValue) return alert("দয়া করে দোকান বা বাড়ি নির্বাচন করুন");
+    
+    const pData = JSON.parse(selectValue);
     const month = document.getElementById("rent-month").value;
     const date = document.getElementById("rent-date").value;
     const receiptNo = document.getElementById("receipt-no").value;
@@ -125,9 +129,8 @@ document.getElementById("download-csv-btn").addEventListener("click", () => {
 
     const startDate = new Date(start);
     const endDate = new Date(end);
-    endDate.setHours(23, 59, 59); // Include full end day
+    endDate.setHours(23, 59, 59);
 
-    // Filter Data by Date
     const filteredRents = allRents.filter(r => {
         const d = new Date(r.date);
         return d >= startDate && d <= endDate;
@@ -138,25 +141,21 @@ document.getElementById("download-csv-btn").addEventListener("click", () => {
         return d >= startDate && d <= endDate;
     });
 
-    // Create CSV Content
-    let csvContent = "\ufeff"; // BOM for Bangla language support in Excel
+    let csvContent = "\ufeff"; 
     csvContent += `রিপোর্ট সময়কাল:, ${start} থেকে ${end}\n\n`;
 
-    // Rent Section
     csvContent += "--- আদায়কৃত ভাড়া ---\n";
     csvContent += "তারিখ, বাড়ি/মার্কেট, দোকান/রুম, মাস, রসিদ নং, পরিমাণ (৳)\n";
     filteredRents.forEach(r => {
         csvContent += `${r.date}, ${r.buildingName}, ${r.unitName}, ${r.month}, ${r.receiptNo}, ${r.amount}\n`;
     });
 
-    // Expense Section
     csvContent += "\n--- খরচ বিবরণী ---\n";
     csvContent += "তারিখ, খরচের খাত, খরচকারী, পরিমাণ (৳)\n";
     filteredExpenses.forEach(e => {
         csvContent += `${e.date}, ${e.sector}, ${e.by}, ${e.amount}\n`;
     });
 
-    // Final Math Summary
     const tRent = filteredRents.reduce((sum, item) => sum + item.amount, 0);
     const tExpense = filteredExpenses.reduce((sum, item) => sum + item.amount, 0);
     csvContent += `\n--- সর্বমোট সামারি ---\n`;
@@ -164,7 +163,6 @@ document.getElementById("download-csv-btn").addEventListener("click", () => {
     csvContent += `মোট খরচ:, ৳ ${tExpense}\n`;
     csvContent += `অবশিষ্ট ক্যাশ ইন হ্যান্ড:, ৳ ${tRent - tExpense}\n`;
 
-    // Trigger Download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
