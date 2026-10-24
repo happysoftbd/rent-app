@@ -1,11 +1,7 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://gstatic.com";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://gstatic.com";
-
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC7u56_bJ2IfQGxglyfo5DSqAj7TmnRppw",
-  authDomain: "rent-app-a88b8.firebaseapp.com",
+  authDomain: "://firebaseapp.com",
   projectId: "rent-app-a88b8",
   storageBucket: "rent-app-a88b8.firebasestorage.app",
   messagingSenderId: "770067014594",
@@ -13,13 +9,13 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // Collections Refs
-const propertiesRef = collection(db, "properties");
-const rentRef = collection(db, "rent_collections");
-const expenseRef = collection(db, "expenses");
+const propertiesRef = db.collection("properties");
+const rentRef = db.collection("rent_collections");
+const expenseRef = db.collection("expenses");
 
 // Local App State for Data Storage
 let allRents = [];
@@ -34,13 +30,13 @@ document.getElementById("property-form").addEventListener("submit", async (e) =>
     const fixedRent = Number(document.getElementById("fixed-rent").value);
 
     try {
-        await addDoc(propertiesRef, { ownerName, buildingName, unitName, fixedRent, createdAt: new Date() });
+        await propertiesRef.add({ ownerName, buildingName, unitName, fixedRent, createdAt: new Date() });
         document.getElementById("property-form").reset();
     } catch (err) { console.error("Error adding property: ", err); }
 });
 
 // Real-time Properties View & Dropdown Update
-onSnapshot(query(propertiesRef, orderBy("createdAt", "desc")), (snapshot) => {
+propertiesRef.orderBy("createdAt", "desc").onSnapshot((snapshot) => {
     const list = document.getElementById("property-list");
     const select = document.getElementById("rent-unit-select");
     list.innerHTML = "";
@@ -72,7 +68,7 @@ document.getElementById("rent-form").addEventListener("submit", async (e) => {
     const amount = Number(document.getElementById("rent-amount").value);
 
     try {
-        await addDoc(rentRef, { 
+        await rentRef.add({ 
             buildingName: pData.building, unitName: pData.unit, 
             month, date, receiptNo, amount, timestamp: new Date(date) 
         });
@@ -89,7 +85,7 @@ document.getElementById("expense-form").addEventListener("submit", async (e) => 
     const amount = Number(document.getElementById("expense-amount").value);
 
     try {
-        await addDoc(expenseRef, { sector, date, by, amount, timestamp: new Date(date) });
+        await expenseRef.add({ sector, date, by, amount, timestamp: new Date(date) });
         document.getElementById("expense-form").reset();
     } catch (err) { console.error(err); }
 });
@@ -105,13 +101,13 @@ function updateDashboard() {
     document.getElementById("cash-in-hand").textContent = cashInHand;
 }
 
-onSnapshot(rentRef, (snapshot) => {
+rentRef.onSnapshot((snapshot) => {
     allRents = [];
     snapshot.forEach(doc => allRents.push(doc.data()));
     updateDashboard();
 });
 
-onSnapshot(expenseRef, (snapshot) => {
+expenseRef.onSnapshot((snapshot) => {
     allExpenses = [];
     snapshot.forEach(doc => allExpenses.push(doc.data()));
     updateDashboard();
@@ -161,7 +157,7 @@ document.getElementById("download-csv-btn").addEventListener("click", () => {
     csvContent += `\n--- সর্বমোট সামারি ---\n`;
     csvContent += `মোট আদায়কৃত ভাড়া:, ৳ ${tRent}\n`;
     csvContent += `মোট খরচ:, ৳ ${tExpense}\n`;
-    csvContent += `অবশিষ্ট ক্যাশ ইন হ্যান্ড:, ৳ ${tRent - tExpense}\n`;
+    csvContent += `অবशिष्ट ক্যাশ ইন হ্যান্ড:, ৳ ${tRent - tExpense}\n`;
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
