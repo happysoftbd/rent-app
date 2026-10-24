@@ -1,16 +1,20 @@
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC7u56_bJ2IfQGxglyfo5DSqAj7TmnRppw",
-  authDomain: "rent-app-a88b8.firebaseapp.com", // 👈 এখানে সঠিক লিংকটি বসানো হয়েছে
+  authDomain: "://firebaseapp.com",
   projectId: "rent-app-a88b8",
   storageBucket: "rent-app-a88b8.firebasestorage.app",
   messagingSenderId: "770067014594",
   appId: "1:770067014594:web:10bd76dea1633eca98ac5b"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// Initialize Firebase safely
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+} else {
+    alert("ফায়ারবেস স্ক্রিপ্ট লোড হতে পারেনি! দয়া করে পেজটি আবার রিফ্রেশ করুন।");
+}
 
 // Collections Refs
 const propertiesRef = db.collection("properties");
@@ -35,7 +39,7 @@ document.getElementById("property-form").addEventListener("submit", async (e) =>
     } catch (err) { console.error("Error adding property: ", err); }
 });
 
-// Real-time Properties View & Dropdown Update (Index Error এড়াতে সর্টিং সহজ করা হয়েছে)
+// Real-time Properties View & Dropdown Update
 propertiesRef.onSnapshot((snapshot) => {
     const list = document.getElementById("property-list");
     const select = document.getElementById("rent-unit-select");
