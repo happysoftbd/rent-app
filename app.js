@@ -10,10 +10,12 @@ const firebaseConfig = {
 
 // Initialize Firebase safely
 if (typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     var db = firebase.firestore();
 } else {
-    alert("ফায়ারবেস স্ক্রিপ্ট লোড হতে পারেনি! দয়া করে পেজটি আবার রিফ্রেশ করুন।");
+    alert("ফায়ারবেস স্ক্রিপ্ট লোড হতে ব্যর্থ হয়েছে! দয়া করে আপনার পেজটি আবার রিফ্রেশ (Ctrl+F5) করুন।");
 }
 
 // Collections Refs
@@ -35,8 +37,12 @@ document.getElementById("property-form").addEventListener("submit", async (e) =>
 
     try {
         await propertiesRef.add({ ownerName, buildingName, unitName, fixedRent, createdAt: new Date() });
+        alert("📊 প্রোপার্টি সফলভাবে ডাটাবেসে যুক্ত করা হয়েছে!");
         document.getElementById("property-form").reset();
-    } catch (err) { console.error("Error adding property: ", err); }
+    } catch (err) { 
+        alert("❌ ডাটা সেভ হতে সমস্যা হয়েছে। এরর: " + err.message);
+        console.error("Error adding property: ", err); 
+    }
 });
 
 // Real-time Properties View & Dropdown Update
@@ -57,6 +63,8 @@ propertiesRef.onSnapshot((snapshot) => {
         option.textContent = `${data.buildingName} - ${data.unitName}`;
         select.appendChild(option);
     });
+}, (error) => {
+    console.error("Snapshot error: ", error);
 });
 
 // --- 2. Rent Collection ---
@@ -76,8 +84,9 @@ document.getElementById("rent-form").addEventListener("submit", async (e) => {
             buildingName: pData.building, unitName: pData.unit, 
             month, date, receiptNo, amount, timestamp: new Date(date) 
         });
+        alert("💰 ভাড়া আদায় সফলভাবে যুক্ত হয়েছে!");
         document.getElementById("rent-form").reset();
-    } catch (err) { console.error(err); }
+    } catch (err) { alert("Error: " + err.message); }
 });
 
 // --- 3. Expense Management ---
@@ -90,8 +99,9 @@ document.getElementById("expense-form").addEventListener("submit", async (e) => 
 
     try {
         await expenseRef.add({ sector, date, by, amount, timestamp: new Date(date) });
+        alert("📉 খরচের বিবরণ সফলভাবে যুক্ত হয়েছে!");
         document.getElementById("expense-form").reset();
-    } catch (err) { console.error(err); }
+    } catch (err) { alert("Error: " + err.message); }
 });
 
 // --- 4. Live Dashboard Calculations ---
