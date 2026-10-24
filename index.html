@@ -6,8 +6,9 @@
     <title>রেন্ট ও প্রোপার্টি ম্যানেজমেন্ট</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- ফায়ারবেস স্ক্রিপ্টগুলো এখানে লোড করা হয়েছে যেন সবার আগে রেডি হয় -->
+    <!-- ফায়ারবেস কোর অ্যাপ স্ক্রিপ্ট (আলাদা করে এবং সবার আগে লোড) -->
     <script src="https://gstatic.com"></script>
+    <!-- ফায়ারবেস ফায়ারস্টোর ডাটাবেস স্ক্রিপ্ট -->
     <script src="https://gstatic.com"></script>
 </head>
 <body>
@@ -18,7 +19,7 @@
         <div class="card">
             <h2>👤 প্রোপার্টি ও মালিকের তথ্য সেটআপ</h2>
             <form id="property-form">
-                <input type="text" id="owner-name" placeholder="مালিকের নাম" required>
+                <input type="text" id="owner-name" placeholder="মালিকের নাম" required>
                 <input type="text" id="building-name" placeholder="বাড়ি/মার্কেটের নাম" required>
                 <input type="text" id="unit-name" placeholder="দোকান বা বাড়ির নাম/নম্বর" required>
                 <input type="number" id="fixed-rent" placeholder="নির্ধারিত মাসিক ভাড়া (টাকা)" required>
@@ -101,7 +102,7 @@
         </div>
     </div>
 
-    <!-- আপনার মেইন স্ক্রিপ্ট ফাইল -->
+    <!-- মেইন অ্যাপ্লিকেশন লজিক স্ক্রিপ্ট -->
     <script src="app.js"></script>
 </body>
 </html>
